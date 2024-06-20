@@ -11,23 +11,25 @@ import requests
 
 client = OpenAI(api_key=key)
 
-trigger_categories = {"war": ["violence", "war", "blood"], "sexual": ["sexual violence", "nudity"], "vehicle accidents":
-    ["car crashes", "vehicles accidents"], "diseases": ["diseases"], "natural disasters":
+trigger_categories = {"war": ["violence", "war", "blood"], "sexualAssault": ["sexual violence", "nudity"], "vehicularAccidents":
+    ["car crashes", "vehicles accidents"], "diseases": ["diseases"], "naturalDisasters":
     ["natural disasters", "earthquakes", "tsunamis", "hurricanes", "tornadoes", "floods"]}
+
 
 def generate_user_prefs(user_json):
     user_prefs = []
     for key in user_json.keys():
-        if user_json[key] == "yes":
+        if user_json[key] == True:
             user_prefs += trigger_categories[key]
-    user_prefs.append(user_json["free_speach"])
+    if user_json["freeSpeech"] != '':
+        user_prefs.append(user_json["freeSpeech"])
     print(f"user_prefs: {user_prefs} \n")
     return user_prefs
 
 # Function to check if the image is triggering or not
 def is_triggering_image(image_url, user_json):
   propmt_message = (
-    f"I would like to avoid the following subjects:{generate_user_prefs(user_json)} in the image I see. "
+    f"I would like to avoid the following subjects: {', '.join(generate_user_prefs(user_json))} in the image I see. "
     f"answer in yes or no if I'll find the following content highly disturbing")
     # print(f"openai got the following url: {image_url}")
   response = client.chat.completions.create(
@@ -35,9 +37,16 @@ def is_triggering_image(image_url, user_json):
     messages=[
       {
         "role": "user",
-        "content": [{"type": "text", "text": propmt_message},{"type": "image_url","image_url": {"url": image_url,},},],
-      }
-    ],
+        "content": [
+          {"type": "text", "text":propmt_message},
+            {
+            "type": "image_url",
+            "image_url": {
+              "url": image_url,
+            },
+          },
+        ],
+      }],
     max_tokens=300,
   )
   return "yes" in response.choices[0].message.content.lower()
@@ -47,8 +56,9 @@ def is_triggering_image(image_url, user_json):
 
 def is_triggering_text(text, user_json):
   propmt_message = (
-    f"I would like to avoid the following subjects:{generate_user_prefs(user_json)} in the text I consume. "
-    f"answer in yes or no if I'll find the following content highly disturbing")
+    f"I would like to avoid the following subjects: {', '.join(generate_user_prefs(user_json))} in the text I consume. "
+    f"answer in yes or no if I'll find the following content highly disturbing: '{text}'")
+  print(propmt_message)
   response = client.chat.completions.create(
     model="gpt-4o",
 

@@ -12,14 +12,13 @@ app = Flask(__name__)
 def classify_tweet():
     data = request.json
     user_data = data.get('userData')
-    print(f"user data: {user_data}")
     tweet_data = data.get('tweetData')
     shouldBlock = False
+    print(f"classifying tweet:\nuser data: {user_data}\ntweet data: {tweet_data}")
     for url in tweet_data['media']:
-        print(f"got to loop with url: {url}")
-        shouldBlock = shouldBlock or is_triggering_image(url, None)
-    shouldBlock = shouldBlock or is_triggering_text(tweet_data['text'], None)
-    print(f"tweet data: {tweet_data}")
+        shouldBlock = shouldBlock or is_triggering_image(url, user_data)
+        # print(f"got to loop with url: {url}")
+    shouldBlock = shouldBlock or is_triggering_text(tweet_data['text'], user_data)
     print(f"result = {shouldBlock}\n\n")
     return jsonify({'block': shouldBlock})
 
