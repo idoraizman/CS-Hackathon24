@@ -11,15 +11,18 @@ import requests
 
 client = OpenAI(api_key=key)
 
+
 # Function to check if the image is triggering or not
 def is_triggering_image(image_url, triggers):
+  print(f"openai got the following url: {image_url}")
   response = client.chat.completions.create(
     model="gpt-4o",
     messages=[
       {
         "role": "user",
         "content": [
-          {"type": "text", "text": f"Does the following image might activate the following triggers: {triggers}? answer in yes or no"},
+          {"type": "text", "text": f"will the following image be highly disturbing for someone who suffers from ptsd from war"
+                                   f"? answer in yes or no"},
           {
             "type": "image_url",
             "image_url": {

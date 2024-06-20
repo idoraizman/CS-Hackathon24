@@ -3,8 +3,14 @@ console.log('Started processing');
 
 // Function to analyze and process the tweet
 async function analyzeAndProcessTweet(tweetElement) {
+    // Wait for a short time to ensure the element is fully parsed
+    await new Promise(resolve => setTimeout(resolve, 200));
     const tweetText = tweetElement.querySelector('div[data-testid="tweetText"]');
-    const tweetMedia = tweetElement.querySelectorAll('img, video');
+    // Updated media selector with more specific paths
+    const tweetMedia = tweetElement.querySelectorAll(
+        'div[aria-label="Image"] img[src*="https://pbs.twimg.com"],' +
+        'div[data-testid="tweetPhoto"] img[src*="https://pbs.twimg.com"]'
+    );
     console.log('analyizing tweet 1: ', tweetElement); // Log found tweets
     console.log('found the following media: ', tweetMedia);
 
@@ -28,7 +34,7 @@ async function analyzeAndProcessTweet(tweetElement) {
     const block = await isOffensive(tweetContent, userData);
     if (block) {
         // Remove the tweet from the DOM
-        console.log('Removing offensive tweet:', tweetContent);
+        // console.log('Removing offensive tweet:', tweetContent);
         tweetElement.remove();
     }
 }
@@ -36,7 +42,7 @@ async function analyzeAndProcessTweet(tweetElement) {
 // Function to determine if the tweet is offensive
 function isOffensive(tweetContent, userData) {
     return new Promise((resolve, reject) => {
-        console.log('Sending message to background script with data:', { userData, tweetContent });
+       console.log('Sending message to background script with data:', { userData, tweetContent });
 
         chrome.runtime.sendMessage({
             type: 'classifyTweet',
@@ -63,7 +69,7 @@ function isOffensive(tweetContent, userData) {
 function processEntireTweet(node) {
     if (node.nodeType === Node.ELEMENT_NODE) {
         const tweets = node.querySelectorAll('article');
-//        console.log('Found tweets:', tweets); // Log found tweets
+        console.log('Found tweets:', tweets); // Log found tweets
         tweets.forEach(tweet => {
             analyzeAndProcessTweet(tweet);
         });

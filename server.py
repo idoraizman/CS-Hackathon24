@@ -13,10 +13,14 @@ def classify_tweet():
     data = request.json
     user_data = data.get('userData')
     tweet_data = data.get('tweetData')
-    result = is_triggering_text(tweet_data['text'], None)
+    shouldBlock = False
+    for url in tweet_data['media']:
+        print(f"got to loop with url: {url}")
+        shouldBlock = shouldBlock or is_triggering_image(url, None)
+    # result = is_triggering_text(tweet_data['text'], None)
     print(f"tweet data: {tweet_data}")
-    print(f"got the following message: {tweet_data['text']}\n result = {result}\n\n")
-    return jsonify({'block': result})
+    print(f"result = {shouldBlock}\n\n")
+    return jsonify({'block': shouldBlock})
 
 
 if __name__ == '__main__':
