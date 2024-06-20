@@ -9,45 +9,75 @@ style.innerHTML = `
     pointer-events: none;
     position: relative;
 }
-.undo-blur-btn {
+.button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    pointer-events: auto;
+}
+.undo-blur-btn, .video-btn {
     background-color: #ffffff;
     border: none;
     border-radius: 5px;
     color: #ffffff;
-    background-color: #1da1f2;
     padding: 10px 15px;
     cursor: pointer;
-    z-index: 1000;
-    pointer-events: auto;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 14px;
     font-weight: bold;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s, box-shadow 0.3s;
+    margin-bottom: 10px;
+}
+.undo-blur-btn {
+    background-color: #1da1f2;
 }
 .undo-blur-btn:hover {
     background-color: #0c85d0;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
+.video-btn {
+    background-color: #8a2be2;
+}
+.video-btn:hover {
+    background-color: #6a1bb1;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
 `;
 document.head.appendChild(style);
 
-// Function to add an undo blur button to a tweet
-function addUndoBlurButton(tweetElement) {
-    const button = document.createElement('button');
-    button.innerText = 'This content is offensive, show anyway';
-    button.classList.add('undo-blur-btn');
+// Function to add an undo blur button and video link to a tweet
+function addButtons(tweetElement) {
+    const buttonContainer = document.createElement('div');
+    buttonContainer.classList.add('button-container');
+
+    const undoButton = document.createElement('button');
+    undoButton.innerText = 'This content is offensive, show anyway';
+    undoButton.classList.add('undo-blur-btn');
     console.log('Adding undo button');
-    button.onclick = () => {
+    undoButton.onclick = () => {
         console.log('Undo button clicked');
         tweetElement.classList.remove('tweet-blurred');
         tweetElement.querySelector('.tweet-blurred-content').classList.remove('tweet-blurred-content');
-        button.remove();
+        buttonContainer.remove();
     };
-    tweetElement.appendChild(button);
+    buttonContainer.appendChild(undoButton);
+
+    const videoButton = document.createElement('button');
+    videoButton.innerText = 'See funny cats video';
+    videoButton.classList.add('video-btn');
+    videoButton.onclick = () => {
+        window.open('https://www.youtube.com/watch?v=82MaJuoUiH8', '_blank');
+    };
+    buttonContainer.appendChild(videoButton);
+
+    tweetElement.appendChild(buttonContainer);
 }
 
 // Function to analyze and process the tweet
@@ -93,7 +123,7 @@ async function analyzeAndProcessTweet(tweetElement) {
         // Append the content container and the undo button to the tweetElement
         tweetElement.appendChild(contentContainer);
         tweetElement.classList.add('tweet-blurred');
-        addUndoBlurButton(tweetElement);
+        addButtons(tweetElement);
     }
 }
 
