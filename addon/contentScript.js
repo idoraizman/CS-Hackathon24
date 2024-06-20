@@ -12,8 +12,8 @@ function removeLinks() {
 
 function analyzeAndReplaceTweet(tweet) {
     const tweetText = tweet.textContent;
-    const mediaElements = tweet.querySelectorAll('img, video');
-    const mediaUrls = Array.from(mediaElements).map(el => el.src);
+    const mediaElements = tweet.querySelectorAll('img, video, picture img, div[aria-label="Image"], div[aria-label="Video"]');
+    const mediaUrls = Array.from(mediaElements).map(el => el.src || el.style.backgroundImage.slice(5, -2));
 
     const tweetData = {
         text: tweetText,
@@ -31,7 +31,13 @@ function analyzeAndReplaceTweet(tweet) {
     }, response => {
         if (response.block) {
             tweet.textContent = "!!!";
-            mediaElements.forEach(el => el.src = '');
+            mediaElements.forEach(el => {
+                if (el.tagName.toLowerCase() === 'img' || el.tagName.toLowerCase() === 'video') {
+                    el.src = '';
+                } else {
+                    el.style.backgroundImage = 'none';
+                }
+            });
         }
         // אם response.block הוא false, לא נבצע שום שינוי בציוץ
     });
