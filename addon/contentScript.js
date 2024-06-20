@@ -1,26 +1,55 @@
 // contentScript.js
 console.log('Started processing');
+
 const style = document.createElement('style');
 style.type = 'text/css';
-style.innerHTML = '.tweet-blurred {' +
-    'filter: blur(10px);' +
-    'pointer-events: none;' +
-'}'
+style.innerHTML = `
+.tweet-blurred-content {
+    filter: blur(15px);
+    pointer-events: none;
+    position: relative;
+}
+.undo-blur-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ffffff;
+    border: 1px solid #000000;
+    color: #000000;
+    padding: 5px;
+    cursor: pointer;
+    z-index: 1000;
+    pointer-events: auto;
+}
+`;
 document.head.appendChild(style);
 
+// Function to add an undo blur button to a tweet
+function addUndoBlurButton(tweetElement) {
+    const button = document.createElement('button');
+    button.innerText = 'This content is offensive, show anyway';
+    button.classList.add('undo-blur-btn');
+    console.log('Adding undo button');
+    button.onclick = () => {
+        console.log('Undo button clicked');
+        tweetElement.classList.remove('tweet-blurred');
+        tweetElement.querySelector('.tweet-blurred-content').classList.remove('tweet-blurred-content');
+        button.remove();
+    };
+    tweetElement.appendChild(button);
+}
 
 // Function to analyze and process the tweet
 async function analyzeAndProcessTweet(tweetElement) {
     // Wait for a short time to ensure the element is fully parsed
     await new Promise(resolve => setTimeout(resolve, 200));
+
     const tweetText = tweetElement.querySelector('div[data-testid="tweetText"]');
     // Updated media selector with more specific paths
     const tweetMedia = tweetElement.querySelectorAll(
         'div[aria-label="Image"] img[src*="https://pbs.twimg.com"],' +
         'div[data-testid="tweetPhoto"] img[src*="https://pbs.twimg.com"]'
     );
-    console.log('analyizing tweet 1: ', tweetElement); // Log found tweets
-    console.log('found the following media: ', tweetMedia);
 
     const tweetContent = {
         text: tweetText ? tweetText.innerText : '',
@@ -36,22 +65,31 @@ async function analyzeAndProcessTweet(tweetElement) {
         // Add user data if you have any
     };
 
-    console.log('Analyzing tweet 2:', tweetContent);
+    console.log('Analyzing tweet:', tweetContent);
 
     // Check if the tweet is offensive
     const block = await isOffensive(tweetContent, userData);
     if (block) {
-        // Remove the tweet from the DOM
-         console.log('Removing offensive tweet:', tweetContent);
-         tweetElement.classList.add('tweet-blurred');
-//        tweetElement.remove();
+        // Blur the tweet content
+        const contentContainer = document.createElement('div');
+        contentContainer.classList.add('tweet-blurred-content');
+
+        // Move all children of the tweetElement to the content container
+        while (tweetElement.firstChild) {
+            contentContainer.appendChild(tweetElement.firstChild);
+        }
+
+        // Append the content container and the undo button to the tweetElement
+        tweetElement.appendChild(contentContainer);
+        tweetElement.classList.add('tweet-blurred');
+        addUndoBlurButton(tweetElement);
     }
 }
 
 // Function to determine if the tweet is offensive
 function isOffensive(tweetContent, userData) {
     return new Promise((resolve, reject) => {
-       console.log('Sending message to background script with data:', { userData, tweetContent });
+        console.log('Sending message to background script with data:', { userData, tweetContent });
 
         chrome.runtime.sendMessage({
             type: 'classifyTweet',
