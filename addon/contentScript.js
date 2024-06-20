@@ -1,26 +1,96 @@
 // contentScript.js
 console.log('Started processing');
+
 const style = document.createElement('style');
 style.type = 'text/css';
-style.innerHTML = '.tweet-blurred {' +
-    'filter: blur(10px);' +
-    'pointer-events: none;' +
-'}'
+style.innerHTML = `
+.tweet-blurred-content {
+    filter: blur(15px);
+    pointer-events: none;
+    position: relative;
+}
+.button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    pointer-events: auto;
+}
+.undo-blur-btn, .video-btn {
+    background-color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    color: #ffffff;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, box-shadow 0.3s;
+    margin-bottom: 10px;
+}
+.undo-blur-btn {
+    background-color: #1da1f2;
+}
+.undo-blur-btn:hover {
+    background-color: #0c85d0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+.video-btn {
+    background-color: #8a2be2;
+}
+.video-btn:hover {
+    background-color: #6a1bb1;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+`;
 document.head.appendChild(style);
 
+// Function to add an undo blur button and video link to a tweet
+function addButtons(tweetElement) {
+    const buttonContainer = document.createElement('div');
+    buttonContainer.classList.add('button-container');
+
+    const undoButton = document.createElement('button');
+    undoButton.innerText = 'This content is offensive, show anyway';
+    undoButton.classList.add('undo-blur-btn');
+    console.log('Adding undo button');
+    undoButton.onclick = () => {
+        console.log('Undo button clicked');
+        tweetElement.classList.remove('tweet-blurred');
+        tweetElement.querySelector('.tweet-blurred-content').classList.remove('tweet-blurred-content');
+        buttonContainer.remove();
+    };
+    buttonContainer.appendChild(undoButton);
+
+    const videoButton = document.createElement('button');
+    videoButton.innerText = 'See funny cats video';
+    videoButton.classList.add('video-btn');
+    videoButton.onclick = () => {
+        window.open('https://www.youtube.com/watch?v=82MaJuoUiH8', '_blank');
+    };
+    buttonContainer.appendChild(videoButton);
+
+    tweetElement.appendChild(buttonContainer);
+}
 
 // Function to analyze and process the tweet
 async function analyzeAndProcessTweet(tweetElement) {
     // Wait for a short time to ensure the element is fully parsed
     await new Promise(resolve => setTimeout(resolve, 200));
+
     const tweetText = tweetElement.querySelector('div[data-testid="tweetText"]');
     // Updated media selector with more specific paths
     const tweetMedia = tweetElement.querySelectorAll(
         'div[aria-label="Image"] img[src*="https://pbs.twimg.com"],' +
         'div[data-testid="tweetPhoto"] img[src*="https://pbs.twimg.com"]'
     );
-    console.log('analyizing tweet 1: ', tweetElement); // Log found tweets
-    console.log('found the following media: ', tweetMedia);
 
     const tweetContent = {
         text: tweetText ? tweetText.innerText : '',
@@ -36,22 +106,31 @@ async function analyzeAndProcessTweet(tweetElement) {
         // Add user data if you have any
     };
 
-    console.log('Analyzing tweet 2:', tweetContent);
+    console.log('Analyzing tweet:', tweetContent);
 
     // Check if the tweet is offensive
     const block = await isOffensive(tweetContent, userData);
     if (block) {
-        // Remove the tweet from the DOM
-         console.log('Removing offensive tweet:', tweetContent);
-         tweetElement.classList.add('tweet-blurred');
-//        tweetElement.remove();
+        // Blur the tweet content
+        const contentContainer = document.createElement('div');
+        contentContainer.classList.add('tweet-blurred-content');
+
+        // Move all children of the tweetElement to the content container
+        while (tweetElement.firstChild) {
+            contentContainer.appendChild(tweetElement.firstChild);
+        }
+
+        // Append the content container and the undo button to the tweetElement
+        tweetElement.appendChild(contentContainer);
+        tweetElement.classList.add('tweet-blurred');
+        addButtons(tweetElement);
     }
 }
 
 // Function to determine if the tweet is offensive
 function isOffensive(tweetContent, userData) {
     return new Promise((resolve, reject) => {
-       console.log('Sending message to background script with data:', { userData, tweetContent });
+        console.log('Sending message to background script with data:', { userData, tweetContent });
 
         chrome.runtime.sendMessage({
             type: 'classifyTweet',
