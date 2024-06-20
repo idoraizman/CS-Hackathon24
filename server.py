@@ -14,7 +14,7 @@ def classify_tweet():
     user_data = data.get('userData')
     tweet_data = data.get('tweetData')
     result = is_triggering_text(tweet_data['text'], None)
-    print(f"media urls: {tweet_data['mediaUrls']}")
+    print(f"tweet data: {tweet_data}")
     print(f"got the following message: {tweet_data['text']}\n result = {result}\n\n")
     return jsonify({'block': result})
 
