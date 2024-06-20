@@ -1,6 +1,6 @@
 # import pytorch
 # import request
-
+import cv2
 from openai import OpenAI
 from myKey import key
 
@@ -34,3 +34,4 @@ war_triggers = "violence, war, blood"
 sexual_triggers = "sexual, nudity"
 animal_triggers = "lions, sharks, snakes"
 print(is_triggering(lion_image_url, animal_triggers))
+# flask, rest
