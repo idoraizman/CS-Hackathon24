@@ -1,5 +1,13 @@
 // contentScript.js
 console.log('Started processing');
+const style = document.createElement('style');
+style.type = 'text/css';
+style.innerHTML = '.tweet-blurred {' +
+    'filter: blur(10px);' +
+    'pointer-events: none;' +
+'}'
+document.head.appendChild(style);
+
 
 // Function to analyze and process the tweet
 async function analyzeAndProcessTweet(tweetElement) {
@@ -34,8 +42,9 @@ async function analyzeAndProcessTweet(tweetElement) {
     const block = await isOffensive(tweetContent, userData);
     if (block) {
         // Remove the tweet from the DOM
-        // console.log('Removing offensive tweet:', tweetContent);
-        tweetElement.remove();
+         console.log('Removing offensive tweet:', tweetContent);
+         tweetElement.classList.add('tweet-blurred');
+//        tweetElement.remove();
     }
 }
 

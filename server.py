@@ -17,7 +17,7 @@ def classify_tweet():
     for url in tweet_data['media']:
         print(f"got to loop with url: {url}")
         shouldBlock = shouldBlock or is_triggering_image(url, None)
-    # result = is_triggering_text(tweet_data['text'], None)
+    shouldBlock = shouldBlock or is_triggering_text(tweet_data['text'], None)
     print(f"tweet data: {tweet_data}")
     print(f"result = {shouldBlock}\n\n")
     return jsonify({'block': shouldBlock})

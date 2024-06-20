@@ -21,7 +21,7 @@ def is_triggering_image(image_url, triggers):
       {
         "role": "user",
         "content": [
-          {"type": "text", "text": f"will the following image be highly disturbing for someone who suffers from ptsd from war"
+          {"type": "text", "text": f"will the following image be disturbing for someone who suffers from ptsd from war"
                                    f"? answer in yes or no"},
           {
             "type": "image_url",
