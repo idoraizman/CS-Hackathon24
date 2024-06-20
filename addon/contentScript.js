@@ -14,12 +14,23 @@ style.innerHTML = `
     top: 10px;
     right: 10px;
     background-color: #ffffff;
-    border: 1px solid #000000;
-    color: #000000;
-    padding: 5px;
+    border: none;
+    border-radius: 5px;
+    color: #ffffff;
+    background-color: #1da1f2;
+    padding: 10px 15px;
     cursor: pointer;
     z-index: 1000;
     pointer-events: auto;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+.undo-blur-btn:hover {
+    background-color: #0c85d0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 `;
 document.head.appendChild(style);
