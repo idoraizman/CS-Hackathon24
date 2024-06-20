@@ -12,6 +12,7 @@ app = Flask(__name__)
 def classify_tweet():
     data = request.json
     user_data = data.get('userData')
+    print(f"user data: {user_data}")
     tweet_data = data.get('tweetData')
     shouldBlock = False
     for url in tweet_data['media']:

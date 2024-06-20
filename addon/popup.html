@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Settings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label, input {
+            font-size: 16px;
+            display: block;
+            margin: 10px 0;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-label input {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <label class="checkbox-label">
+        Sexual Assault
+        <input type="checkbox" id="sexualAssault">
+    </label>
+    <label class="checkbox-label">
+        War
+        <input type="checkbox" id="war">
+    </label>
+    <label class="checkbox-label">
+        Vehicular Accidents
+        <input type="checkbox" id="vehicularAccidents">
+    </label>
+    <label class="checkbox-label">
+        Natural Disasters
+        <input type="checkbox" id="naturalDisasters">
+    </label>
+    <label class="checkbox-label">
+        Diseases
+        <input type="checkbox" id="diseases">
+    </label>
+    <label>
+        Free Text: <input type="text" id="freeSpeech" placeholder="Enter your text">
+    </label>
+    <button id="saveSettings">Save Settings</button>
+    <script src="popup.js"></script>
+</body>
+</html>

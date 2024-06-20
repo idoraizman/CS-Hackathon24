@@ -1,0 +1,131 @@
+// contentScript.js
+console.log('Started processing');
+
+// Add CSS for blurring and the undo button
+const style = document.createElement('style');
+style.type = 'text/css';
+style.innerHTML = `
+.tweet-blurred {
+    filter: blur(5px);
+    pointer-events: none;
+    position: relative;
+}
+
+.undo-blur-btn-container {
+    position: relative;
+}
+
+.undo-blur-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ffffff;
+    border: 1px solid #000000;
+    color: #000000;
+    padding: 5px;
+    cursor: pointer;
+    z-index: 1000;
+    filter: none; /* Ensure the button is not blurred */
+    pointer-events: all; /* Ensure the button is clickable */
+}
+`;
+document.head.appendChild(style);
+
+// Function to add an undo blur button to a tweet
+function addUndoBlurButton(tweetElement) {
+    const container = document.createElement('div');
+    container.classList.add('undo-blur-btn-container');
+    
+    const button = document.createElement('button');
+    button.innerText = 'Undo Blur';
+    button.classList.add('undo-blur-btn');
+    button.onclick = () => {
+        tweetElement.classList.remove('tweet-blurred');
+        container.remove();
+    };
+    container.appendChild(button);
+    tweetElement.parentElement.insertBefore(container, tweetElement);
+}
+
+// Function to analyze and process the tweet
+async function analyzeAndProcessTweet(tweetElement) {
+    const tweetText = tweetElement.querySelector('div[data-testid="tweetText"]');
+    const tweetMedia = tweetElement.querySelectorAll('img, video');
+    console.log('analyzing tweet 1: ', tweetElement); // Log found tweets
+    console.log('found the following media: ', tweetMedia);
+
+    const tweetContent = {
+        text: tweetText ? tweetText.innerText : '',
+        media: []
+    };
+
+    tweetMedia.forEach(media => {
+        const mediaUrl = media.src || media.currentSrc;
+        tweetContent.media.push(mediaUrl);
+    });
+
+    // שליחת הבקשה ל-background.js עם userData מהאחסון
+    chrome.runtime.sendMessage({
+        type: 'classifyTweet',
+        tweetData: tweetContent
+    }, response => {
+        if (response.block) {
+            console.log('Blurring offensive tweet:', tweetContent);
+            tweetElement.classList.add('tweet-blurred');
+            addUndoBlurButton(tweetElement);
+        }
+    });
+}
+
+// Function to process the entire tweet
+function processEntireTweet(node) {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+        const tweets = node.querySelectorAll('article');
+        tweets.forEach(tweet => {
+            analyzeAndProcessTweet(tweet);
+        });
+    }
+}
+
+// Initialize MutationObserver to watch for dynamically added tweets
+const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+        mutation.addedNodes.forEach(node => {
+            processEntireTweet(node);
+        });
+    });
+});
+
+// Function to wait for an element to be available
+function waitForElement(selector, callback) {
+    const element = document.querySelector(selector);
+    if (element) {
+        callback(element);
+    } else {
+        setTimeout(() => waitForElement(selector, callback), 100);
+    }
+}
+
+// Wait for the page to fully load
+window.onload = () => {
+    console.log('Page fully loaded');
+
+    // Alternative selectors for the timeline container
+    const timelineSelectors = [
+        '[aria-label="Timeline: Your Home Timeline"]',
+        '[role="region"] > div > div > div > div > div:nth-child(2) > div:nth-child(2)', // This is a more generic path
+        'main[role="main"] section > div > div' // Another generic path
+    ];
+
+    // Try each selector until one works
+    for (const selector of timelineSelectors) {
+        waitForElement(selector, (timeline) => {
+            console.log('Started observing', timeline);
+            const config = { childList: true, subtree: true };
+            observer.observe(timeline, config);
+
+            // Initial processing of already loaded tweets
+            document.querySelectorAll('article').forEach(article => processEntireTweet(article));
+        });
+    }
+};

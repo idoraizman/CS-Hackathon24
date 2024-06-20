@@ -4,7 +4,8 @@
     "version": "1.0.0",
     "permissions": [
         "activeTab",
-        "scripting"
+        "scripting",
+        "storage"
     ],
     "background": {
         "service_worker": "background.js"
@@ -15,5 +16,14 @@
             "js": ["contentScript.js"],
             "run_at": "document_idle"
         }
-    ]
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+
+        }
+    },
+    "icons": {
+
+    }
 }
