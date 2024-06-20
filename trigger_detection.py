@@ -42,7 +42,8 @@ def is_triggering_text(text, triggers):
 
     messages=[
       {"role": "user",
-       "content": f"Could the following text be disturbing for someone who has ptsd from war? Answer in yes or no: {text}"},
+       "content": f"will the following text be highly disturbing for someone who suffers from ptsd from war?"
+                  f" Answer in yes or no: {text}"},
     ],
 
     max_tokens=300,

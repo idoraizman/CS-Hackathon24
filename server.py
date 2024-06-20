@@ -13,10 +13,10 @@ def classify_tweet():
     data = request.json
     user_data = data.get('userData')
     tweet_data = data.get('tweetData')
-    # result = is_triggering_text(tweet_data['text'], None)
-    print(tweet_data)
-    # print(f"got the following message: {tweet_data['text']}\n result = {result}\n\n")
-    return jsonify({'block': True})
+    result = is_triggering_text(tweet_data['text'], None)
+    print(f"media urls: {tweet_data['mediaUrls']}")
+    print(f"got the following message: {tweet_data['text']}\n result = {result}\n\n")
+    return jsonify({'block': result})
 
 
 if __name__ == '__main__':
