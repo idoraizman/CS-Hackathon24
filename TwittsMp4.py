@@ -1,5 +1,12 @@
 ### video detection
 
+"""
+This script is used for detecting triggering content in videos. It uses the OpenAI API to analyze the frames of the
+video and categorize them into different trigger categories such as war, sexual assault, vehicular accidents, diseases,
+and natural disasters. The script also allows for user preferences to be generated and used in the trigger
+detection process.
+"""
+
 from myKey import key
 from openai import OpenAI
 
@@ -8,12 +15,21 @@ import base64
 from PIL import Image
 from io import BytesIO
 
-client = OpenAI(api_key=key)
+client = OpenAI(api_key=key) # Initialize the OpenAI client with the provided API key
 
 def is_triggering_video(video, triggers):
-    # video should be mp4
+    """
+    Check if a video is triggering based on user preferences.
+
+    Parameters:
+    video (str): The path to the video file to check. should be mp4!
+    triggers (str): A string containing user preferences.
+
+    Returns:
+    bool: True if the video is triggering, False otherwise.
+    """
     try:
-        video = mp.VideoFileClip(video)
+        video = mp.VideoFileClip(video) # Load the video file
     except Exception as e:
         print(f"Error loading video: {e}")
 
@@ -50,6 +66,7 @@ def is_triggering_video(video, triggers):
         "max_tokens": 200,
     }
 
+    # Send the request to the OpenAI API and get the response
     response = client.chat.completions.create(**params)
     return "yes" in response.choices[0].message.content.lower()
 
